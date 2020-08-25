@@ -1,6 +1,6 @@
 {
   "name": "encrypted-fetcher",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Rest API Fetcher with AES Encryption",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
