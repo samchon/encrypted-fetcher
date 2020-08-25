@@ -1,0 +1,37 @@
+{
+  "name": "encrypted-fetcher",
+  "version": "0.0.1",
+  "description": "Rest API Fetcher with AES Encryption",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "rm -rf lib && tsc",
+    "dev": "rm -rf lib && tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samchon/encrypted-fetcher.git"
+  },
+  "keywords": [
+    "fetcher",
+    "aes",
+    "pkcs",
+    "encryption",
+    "rest",
+    "api"
+  ],
+  "author": "Jeongho Nam",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/samchon/encrypted-fetcher/issues"
+  },
+  "homepage": "https://github.com/samchon/encrypted-fetcher#readme",
+  "devDependencies": {
+    "@types/node": "^14.6.0",
+    "typescript": "^4.0.2"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.0",
+    "tstl": "^2.4.11"
+  }
+}
