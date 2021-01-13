@@ -1,9 +1,13 @@
 import { AesPkcs5 } from "./AesPkcs5";
 import { HttpError } from "./HttpError";
+import { IPassword } from "./IPassword";
 
-import { is_node } from "tstl/utility/node";
-if (is_node() === true)
-    (global as any).fetch = require("node-fetch");
+// POLYFILL FOR NODE
+if (typeof global === "object"
+    && typeof global.process === "object" 
+    && typeof global.process.versions === "object"
+    && typeof global.process.versions.node !== undefined)
+(global as any).fetch = require("node-fetch");
 
 /**
  * Rest API Fetcher with AES Encryption
@@ -28,8 +32,7 @@ export class EncryptedFetcher<Headers extends object = {}>
      */
     protected headers_?: Headers;
 
-    private readonly key_: string;
-    private readonly iv_: string;
+    private readonly password_: IPassword | IPassword.Closure;
 
     /* -----------------------------------------------------------
         CONSTRUCTORS
@@ -38,15 +41,13 @@ export class EncryptedFetcher<Headers extends object = {}>
      * Initializer Constructor
      * 
      * @param host Host address of the target server.
-     * @param key Key value of the encryption.
-     * @param iv Initializer Vector for the encryption.
+     * @param password Password for the encryption.
      * @param headers Additional headers if you required.
      */
-    public constructor(host: string, key: string, iv: string, headers?: Headers)
+    public constructor(host: string, password: IPassword | IPassword.Closure, headers?: Headers)
     {
         this.host = host;
-        this.key_ = key;
-        this.iv_ = iv;
+        this.password_ = password;
         this.headers_ = headers;
     }
 
@@ -91,11 +92,14 @@ export class EncryptedFetcher<Headers extends object = {}>
             else
             {
                 sendData = JSON.stringify(input);
-                sendData = AesPkcs5.encode(sendData, this.key_, this.iv_);
+                const password: IPassword = this.password_ instanceof Function
+                    ? this.password_(sendData, true)
+                    : this.password_;
+                sendData = AesPkcs5.encode(sendData, password.key, password.iv);
             }
 
         // INTIALIZE REQUEST
-        let init: RequestInit = {
+        const init: RequestInit = {
             method: method,
             body: sendData,
             headers: <any>this.headers_
@@ -105,7 +109,7 @@ export class EncryptedFetcher<Headers extends object = {}>
         // RESPONSE
         //----
         // DO FETCH
-        let response: Response = await fetch(`${this.host}${path}`, init);
+        const response: Response = await fetch(`${this.host}${path}`, init);
         let replyData: string = await response.text();
 
         // CHECK STATUS CODE
@@ -113,7 +117,10 @@ export class EncryptedFetcher<Headers extends object = {}>
             throw new HttpError(method, path, response.status, replyData);
 
         // FINALIZATION WITH DECODING
-        replyData = AesPkcs5.decode(replyData, this.key_, this.iv_);
+        const password: IPassword = this.password_ instanceof Function
+            ? this.password_(replyData, false)
+            : this.password_;
+        replyData = AesPkcs5.decode(replyData, password.key, password.iv);
         return JSON.parse(replyData);
     }
 }

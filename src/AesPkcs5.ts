@@ -1,5 +1,4 @@
 import crypto from "crypto";
-import { randint } from "tstl/algorithm/random";
 
 /**
  * Utility class for AES Encryption.
@@ -62,4 +61,10 @@ export namespace AesPkcs5
         return ret;
     }
     const CHARACTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+}
+
+function randint(x: number, y: number): number
+{
+    const rand: number = Math.random() * (y - x + 1);
+    return Math.floor(rand) + x;
 }
